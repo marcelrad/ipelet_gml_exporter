@@ -26,7 +26,7 @@ function findLabel(model, pos)
 	local l = ""
 	for i, obj, sel, layer in model:page():objects() do
 		if (obj:type() == "text") then
-			if  (obj:position() - pos):sqLen() < 1 then
+			if  (obj:matrix() * obj:position() - pos):sqLen() < 1 then
 				l =  obj:text()
 				break
 			end
@@ -39,7 +39,7 @@ function printNode(model, i, obj)
 	if (obj:type() == "reference") then
 		print("\tnode [")
 		print("\t\tid " .. tostring(i))
-		local l = findLabel(model, obj:position())
+		local l = findLabel(model, obj:matrix() * obj:position())
 		if (l  == "") then
 			l = i	
 		end  
@@ -62,9 +62,10 @@ function printEdge(model, source, target)
 	end
 end
 
-function handleCurve(model, curve)
+function handleCurve(model, curve, obj)
 	local p = model:page()
 	for _, seg in ipairs(curve) do
+		--print("-----------------------------------------------")
 		if (seg["type"] == "segment") then
 			local is_source = true
 			local source = -1
@@ -72,8 +73,9 @@ function handleCurve(model, curve)
 			
 			for k, v, _, _ in p:objects() do 
 				if (v:type() == "reference") then
-					for j, p in ipairs(seg) do
-						if (p - v:position()):sqLen() < 1 then
+					for _, pos in ipairs(seg) do
+						if (obj:matrix() * pos - v:matrix() * v:position()):sqLen() < 1 then
+						
 							if (is_source) then
 								source = k
 								is_source = false
@@ -84,7 +86,6 @@ function handleCurve(model, curve)
 					end
 				end
 			end
-
 			printEdge(model, source, target)
 		end
 	end
@@ -117,7 +118,7 @@ function run(model)
 		
 		for _, subPath in ipairs(shape) do
 			if (subPath["type"] == "curve") then
-				handleCurve(model, subPath)
+				handleCurve(model, subPath, obj)
 			end
 		end
 	  ::continue::

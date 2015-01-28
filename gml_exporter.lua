@@ -40,9 +40,9 @@ function printNode(model, i, obj)
 		print("\tnode [")
 		print("\t\tid " .. i)
 		local l = findLabel(model, obj:matrix() * obj:position())
-		--if (l  == "") then
-		--    l = i	
-		--end  
+		if (l  == "") then
+			l = i	
+		end  
 		print("\t\tlabel \"" .. tostring(l) .. "\"")
 		print("\t\tgraphics [")
 		local pos = obj:matrix() * obj:position()

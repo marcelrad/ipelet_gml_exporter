@@ -25,7 +25,7 @@ about = "Export a graph to gml format. "
 function findLabel(model, pos) 
 	local l = ""
 	for i, obj, sel, layer in model:page():objects() do
-		if (obj:type() == "text") then
+		if (obj:type() == "text") and  model:page():visible(model.vno, layer) then
 			if  (obj:matrix() * obj:position() - pos):sqLen() < 1 then
 				l =  obj:text()
 				break
@@ -38,15 +38,16 @@ end
 function printNode(model, i, obj) 
 	if (obj:type() == "reference") then
 		print("\tnode [")
-		print("\t\tid " .. tostring(i))
+		print("\t\tid " .. i)
 		local l = findLabel(model, obj:matrix() * obj:position())
-		if (l  == "") then
-			l = i	
-		end  
+		--if (l  == "") then
+		--    l = i	
+		--end  
 		print("\t\tlabel \"" .. tostring(l) .. "\"")
 		print("\t\tgraphics [")
-		print("\t\t\tx " .. tostring(obj:position().x))
-		print("\t\t\ty " .. tostring(obj:position().y))
+		local pos = obj:matrix() * obj:position()
+		print("\t\t\tx " .. string.format("%3f", pos.x))
+		print("\t\t\ty " .. string.format("%3f", pos.y))
 		print("\t\t]")
 		print("\t]")
 	end
@@ -71,8 +72,8 @@ function handleCurve(model, curve, obj)
 			local source = -1
 			local target = -1
 			
-			for k, v, _, _ in p:objects() do 
-				if (v:type() == "reference") then
+			for k, v, _, layer in p:objects() do 
+				if (v:type() == "reference") and  p:visible(model.vno, layer) then
 					for _, pos in ipairs(seg) do
 						if (obj:matrix() * pos - v:matrix() * v:position()):sqLen() < 1 then
 						
@@ -98,22 +99,20 @@ function run(model)
 	print("\tdirected 0")
 	local p = model:page()
 	for i, obj, sel, layer in p:objects() do
-		printNode(model, i, obj)
+		
+		if p:visible(model.vno, layer)  then
+			printNode(model, i, obj)
+		end
 	end
 
 	for i, obj, sel, layer in p:objects() do
-		-- do nothing if the object is invisible and invisible objects
-		-- should not be moved
-		if not p:visible(model.vno, layer) and
-			not moveInvisibleObjects then
-				goto continue
+		if not p:visible(model.vno, layer)  then
+			goto cont_seg
 		end
 		
-		-- do nothing if it is not a path
 		if obj:type() ~= "path" then
-			goto continue
+			goto cont_seg
 		end
-			
 		local shape = obj:shape()
 		
 		for _, subPath in ipairs(shape) do
@@ -121,7 +120,7 @@ function run(model)
 				handleCurve(model, subPath, obj)
 			end
 		end
-	  ::continue::
+	  ::cont_seg::
 	end
 	print("]")
 end

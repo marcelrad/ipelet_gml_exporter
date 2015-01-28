@@ -2,7 +2,7 @@
 A simple to tool to a export a graph modeled in Ipe in gml format. The tool passed the output to your console. This Iplete only handels the current page. 
  
 * Marks are handled as nodes
-* Segments are undirectd edges
+* Segments are undirected edges
 * Optionally you can add a text label to a mark. Then this text is used as node label instead of an id.
 
 #Installation

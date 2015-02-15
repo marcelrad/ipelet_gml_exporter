@@ -6,7 +6,7 @@ A simple tool to a export a graph, modeled in Ipe, to gml format. The tool passe
 * Optionally you can add a text label to a mark. Then this text is used as node label instead of an id.
 
 #Installation
-Copy this file to .ipe/ipelets. 
+Copy the file *gml_exporter.lua* to your *~/.ipe/ipelets* folder. 
 
 #Compatibility
 Tested with Ipe 7.1.5
